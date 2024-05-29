@@ -26,7 +26,10 @@ class BudaService
         res = Net::HTTP.get_response(orders_uri)
 
         if res.is_a?(Net::HTTPSuccess)
-            return JSON.parse(res.body)
+            order_book = JSON.parse(res.body)["order_book"]
+            # Getting value of cheapest ask and most expensive bid
+            sprd = Float(order_book["asks"][0][0]) - Float(order_book["bids"][0][0])
+            return {spread: sprd, market_id: order_book["market_id"]}
         end
     end
 end
