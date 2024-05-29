@@ -1,8 +1,22 @@
 class ApplicationController < ActionController::API
+    before_action :initialize_buda_service
+
     def index
-        buda_service = BudaService.new
-        markets = buda_service.get_markets
+        markets = @buda_service.get_markets
         markets = {message: "error"} if markets.nil?
         render json: markets
+    end
+
+    def spread
+        mkt_id = params[:market_id]
+        spread = @buda_service.get_spread(mkt_id)
+        spread = {message: "error"} if spread.nil?
+        render json: spread 
+    end
+
+    protected
+
+    def initialize_buda_service
+        @buda_service = BudaService.new
     end
 end
