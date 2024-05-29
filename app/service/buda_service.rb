@@ -45,7 +45,7 @@ class BudaService
                 sprd.nil? ? sprd_error = true : sprd = sprd[:spread][:value]
                 [mkt_id, sprd]
             end
-            return {spreads: sprds.to_h} unless sprd_error
+            return sprd_error ? nil : {spreads: sprds.to_h}
         end
     end
 end 
