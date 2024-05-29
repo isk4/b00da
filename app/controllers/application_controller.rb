@@ -4,14 +4,16 @@ class ApplicationController < ActionController::API
     def markets
         markets = @buda_service.get_markets
         markets = {message: "error"} if markets.nil?
-        render json: markets
+        code = markets.nil? ? :ok : :service_unavailable
+        render json: markets, status: code
     end
 
     def spread
         mkt_id = params[:market_id]
         spread = @buda_service.get_spread(mkt_id)
         spread = {message: "error"} if spread.nil?
-        render json: spread 
+        code = spread.nil? ? :ok : :service_unavailable
+        render json: spread, status: code
     end
 
     def all_spreads

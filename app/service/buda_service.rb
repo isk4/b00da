@@ -13,11 +13,9 @@ class BudaService
 
         if res.is_a?(Net::HTTPSuccess)
             mkts = JSON.parse(res.body)["markets"]
-
             mkts = mkts.map.with_index do | mkt, i |
                 {id: mkt["id"], number: "#{i + 1}"}
             end
-            
             return {markets: mkts}
         end
     end
@@ -28,23 +26,26 @@ class BudaService
 
         if res.is_a?(Net::HTTPSuccess)
             order_book = JSON.parse(res.body)["order_book"]
+            sprd = nil
+            # Getting value of cheapest ask and most expensive bid
             unless order_book["asks"].empty? || order_book["bids"].empty?
-                # Getting value of cheapest ask and most expensive bid
                 sprd = BigDecimal(order_book["asks"][0][0]) - BigDecimal(order_book["bids"][0][0])
-                return {spread: {value: sprd, market_id: order_book["market_id"]}}
             end
+            return {spread: {value: sprd, market_id: order_book["market_id"]}}
         end
     end
 
     def get_all_spreads
-        mkts = get_markets[:markets]
-        mkt_ids = mkts.map { | mkt | mkt[:id] }
-
-        sprds = mkt_ids.map do | mkt_id |
-            sprd = get_spread(mkt_id)
-            sprd = sprd[:spread][:value] unless sprd.nil?
-            [mkt_id, sprd]
+        mkts = get_markets
+        unless mkts.nil?
+            mkt_ids = mkts[:markets].map { | mkt | mkt[:id] }
+            sprd_error = false
+            sprds = mkt_ids.map do | mkt_id |
+                sprd = get_spread(mkt_id)
+                sprd.nil? ? sprd_error = true : sprd = sprd[:spread][:value]
+                [mkt_id, sprd]
+            end
+            return {spreads: sprds.to_h} unless sprd_error
         end
-        return {spreads: sprds.to_h}
     end
 end 
