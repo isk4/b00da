@@ -1,5 +1,8 @@
 class ApplicationController < ActionController::API
     def index
-        render json: { hola: "mundo "}
+        buda_service = BudaService.new
+        markets = buda_service.get_markets
+
+        render json: markets
     end
 end
