@@ -8,6 +8,6 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   get "spread/:market_id", to: "application#spread"
   get "spreads", to: "application#all_spreads"
-
+  get "markets", to: "application#markets"
   root "application#index"
 end

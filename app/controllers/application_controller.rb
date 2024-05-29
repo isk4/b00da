@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::API
     before_action :initialize_buda_service
 
-    def index
+    def markets
         markets = @buda_service.get_markets
         markets = {message: "error"} if markets.nil?
         render json: markets
