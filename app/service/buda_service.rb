@@ -14,7 +14,7 @@ class BudaService
             mkts = JSON.parse(res.body)["markets"]
 
             mkts = mkts.map.with_index do | mkt, i |
-                {"#{i + 1}": mkt["id"]}
+                {id: mkt["id"], number: "#{i + 1}"}
             end
             
             return {markets: mkts}
@@ -27,9 +27,23 @@ class BudaService
 
         if res.is_a?(Net::HTTPSuccess)
             order_book = JSON.parse(res.body)["order_book"]
-            # Getting value of cheapest ask and most expensive bid
-            sprd = Float(order_book["asks"][0][0]) - Float(order_book["bids"][0][0])
-            return {spread: sprd, market_id: order_book["market_id"]}
+            unless order_book["asks"].empty? || order_book["bids"].empty?
+                # Getting value of cheapest ask and most expensive bid
+                sprd = Float(order_book["asks"][0][0]) - Float(order_book["bids"][0][0])
+                return {spread: {value: sprd, market_id: order_book["market_id"]}}
+            end
         end
     end
-end
+
+    def get_all_spreads
+        mkts = get_markets[:markets]
+        mkt_ids = mkts.map { | mkt | mkt[:id] }
+
+        sprds = mkt_ids.map do | mkt_id |
+            sprd = get_spread(mkt_id)
+            sprd = sprd[:spread][:value] unless sprd.nil?
+            [mkt_id, sprd]
+        end
+        return {spreads: sprds.to_h}
+    end
+end 

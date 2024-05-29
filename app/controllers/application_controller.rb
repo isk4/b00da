@@ -14,6 +14,11 @@ class ApplicationController < ActionController::API
         render json: spread 
     end
 
+    def all_spreads
+        spreads = @buda_service.get_all_spreads
+        render json: spreads
+    end
+
     protected
 
     def initialize_buda_service
