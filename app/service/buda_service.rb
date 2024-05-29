@@ -7,17 +7,17 @@ class BudaService
     end
 
     def get_markets
-        markets_uri = URI("https://www.buda.com/api/v2/markets.json")
-        res = Net::HTTP.get_response(markets_uri)
+        mkts_uri = URI("https://www.buda.com/api/v2/markets.json")
+        res = Net::HTTP.get_response(mkts_uri)
+        
         if res.is_a?(Net::HTTPSuccess)
-            res = JSON.parse(res.body)
-            mkts = []
+            mkts = JSON.parse(res.body)["markets"]
 
-            res = res["markets"].each_with_index do | market, index |
-                mkts << { "#{index + 1}": market["id"] }
+            mkts = mkts.map.with_index do | mkt, i |
+                {"#{i + 1}": mkt["id"]}
             end
             
-            return { markets: mkts }
+            return {markets: mkts}
         end
     end
 end
