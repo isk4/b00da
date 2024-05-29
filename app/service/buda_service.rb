@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "net/http"
+require "bigdecimal"
 
 class BudaService
     def initialize
@@ -29,7 +30,7 @@ class BudaService
             order_book = JSON.parse(res.body)["order_book"]
             unless order_book["asks"].empty? || order_book["bids"].empty?
                 # Getting value of cheapest ask and most expensive bid
-                sprd = Float(order_book["asks"][0][0]) - Float(order_book["bids"][0][0])
+                sprd = BigDecimal(order_book["asks"][0][0]) - BigDecimal(order_book["bids"][0][0])
                 return {spread: {value: sprd, market_id: order_book["market_id"]}}
             end
         end
