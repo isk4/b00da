@@ -9,7 +9,7 @@ Rails.application.routes.draw do
   get "spread/:market_id", to: "application#spread"
   get "spreads", to: "application#all_spreads"
   get "markets", to: "application#markets"
-  post "spread/:market_id/:spread", to: "application#save_spread_alert"
-  get "spread/:market_id/alert", to: "application#poll_spread_alert"
+  post "spread_alert", to: "application#save_spread_alert"
+  get "spread_alert/:market_id", to: "application#poll_spread_alert"
   root "application#index"
 end

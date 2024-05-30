@@ -25,9 +25,9 @@ class ApplicationController < ActionController::API
     def save_spread_alert
         user = request.remote_ip
         user_data = Rails.cache.fetch(user) { {} }
-        mkt_id = params[:market_id]
-        spread = params[:spread]
-        user_data[mkt_id] = spread
+        mkt_id = spread_alert_params[:market_id]
+        spread = spread_alert_params[:spread]
+        user_data[mkt_id] = BigDecimal(spread)
         Rails.cache.write(user, user_data)
     end
 
@@ -36,7 +36,7 @@ class ApplicationController < ActionController::API
         user_data = Rails.cache.read(user)
         mkt_id = params[:market_id]
         if user_data && user_data[mkt_id]
-            saved_spread = BigDecimal(user_data[mkt_id])
+            saved_spread = user_data[mkt_id]
             spread_comp = @buda_service.compare_spread(mkt_id, saved_spread)
             render json: spread_comp
         end
@@ -46,5 +46,9 @@ class ApplicationController < ActionController::API
 
     def initialize_buda_service
         @buda_service = BudaService.new
+    end
+
+    def spread_alert_params
+        params.require(:alert).permit(:market_id, :spread)
     end
 end

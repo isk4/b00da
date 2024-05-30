@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "net/http"
-require "bigdecimal"
 
 class BudaService
     def initialize
