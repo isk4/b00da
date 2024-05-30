@@ -22,6 +22,15 @@ class ApplicationController < ActionController::API
         render json: spreads, status: code
     end
 
+    def save_spread_alert
+        user = request.remote_ip
+        user_data = Rails.cache.read(user) { {} }
+        mkt_id = params[:market_id]
+        spread = params[:spread]
+        user_data[mkt_id] = spread
+        Rails.cache.write(user, user_data)
+    end
+
     protected
 
     def initialize_buda_service
