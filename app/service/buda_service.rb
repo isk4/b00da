@@ -48,4 +48,26 @@ class BudaService
             return sprd_error ? nil : {spreads: sprds.to_h}
         end
     end
+
+    def compare_spread(mkt_id, saved_value)
+        sprd = get_spread(mkt_id)
+        if sprd
+            curr_value = sprd[:spread][:value]            
+            msg = if curr_value > saved_value
+                "greater"
+            elsif curr_value < saved_value
+                "less"
+            else
+                "equal"
+            end
+            diff = - (saved_value - curr_value) 
+            return {spread: {
+                market_id: mkt_id,
+                comparison: msg,
+                difference: diff,
+                current_spread: curr_value,
+                alert_spread: saved_value
+            }}
+        end
+    end
 end 
