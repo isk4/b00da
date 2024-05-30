@@ -28,7 +28,8 @@ class ApplicationController < ActionController::API
         mkt_id = spread_alert_params[:market_id]
         spread = spread_alert_params[:spread]
         user_data[mkt_id] = BigDecimal(spread)
-        Rails.cache.write(user, user_data)
+        code = Rails.cache.write(user, user_data) ? :ok : service_unavailable
+        render json: {user_alerts: user_data}, status: code
     end
 
     def poll_spread_alert
@@ -38,8 +39,9 @@ class ApplicationController < ActionController::API
         if user_data && user_data[mkt_id]
             saved_spread = user_data[mkt_id]
             spread_comp = @buda_service.compare_spread(mkt_id, saved_spread)
-            render json: spread_comp
         end
+        code = spread_comp ? :ok : :not_found
+        render json: spread_comp, status: code
     end
 
     protected
