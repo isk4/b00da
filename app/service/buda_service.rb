@@ -9,9 +9,7 @@ class BudaService
 
         if res.is_a?(Net::HTTPSuccess)
             mkts = JSON.parse(res.body)["markets"]
-            mkts = mkts.map.with_index do | mkt, i |
-                {id: mkt["id"], number: "#{i + 1}"}
-            end
+            mkts = mkts.map { |mkt| mkt["id"] }
             return {markets: mkts}
         end
     end
@@ -35,9 +33,8 @@ class BudaService
         mkts = get_markets
 
         if mkts
-            mkt_ids = mkts[:markets].map { | mkt | mkt[:id] }
             sprd_error = false
-            sprds = mkt_ids.map do | mkt_id |
+            sprds = mkts[:markets].map do | mkt_id |
                 sprd = get_spread(mkt_id)
                 sprd ? sprd = sprd[:spread][:value] : sprd_error = true
                 [mkt_id, sprd]
