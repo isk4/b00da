@@ -1,24 +1,110 @@
-# README
+# b00da REST API
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Esta API se conecta con la [API de Buda](http://api.buda.com/), permitiendo:
 
-Things you may want to cover:
+* Calcular el spread de un mercado
+* Obtener el spread de todos los mercados disponibles
+* Guardar un spread de "alerta", el cual puede ser comparado mediante polling con el spread actual del mercado
 
-* Ruby version
+Para correr el proyecto, primero clona el repositorio con:
 
-* System dependencies
+    git clone https://github.com/isk4/b00da.git
 
-* Configuration
+Luego, dento de la carpeta del proyecto, arma la imagen de Docker:
 
-* Database creation
+    docker build -t b00da .
 
-* Database initialization
+**¡Y listo!** Ahora sólo necesitas usar el siguiente comando para iniciar el servidor:
 
-* How to run the test suite
+    docker run -p 3000:3000 --rm b00da
 
-* Services (job queues, cache servers, search engines, etc.)
+## Endpoints
+### ``GET /markets``
 
-* Deployment instructions
+Permite obtener un listado de mercados disponibles.
 
-* ...
+Ejemplo:
+
+```
+{
+    "markets": [
+        "BTC-CLP",
+        "BTC-COP",
+        "ETH-CLP",
+        ...
+    ]
+}
+```
+
+### ``GET /spread/<market_id>``
+
+Permite consultar el spread de un mercado en particular.
+
+Ejemplo:
+
+```
+{
+    "markets": [
+        "BTC-CLP",
+        "BTC-COP",
+        "ETH-CLP",
+        ...
+    ]
+}
+```
+
+### ``GET /spreads``
+
+Obtiene los spreads de todos los mercados disponibles.
+
+Ejemplo:
+
+```
+{
+    "markets": [
+        "BTC-CLP",
+        "BTC-COP",
+        "ETH-CLP",
+        ...
+    ]
+}
+```
+
+### ``POST /spread_alert``
+
+Guarda un spread de alerta para posteriormente ser comparado con el spread actual del mercado.
+
+Ejemplo:
+
+```
+{
+    "markets": [
+        "BTC-CLP",
+        "BTC-COP",
+        "ETH-CLP",
+        ...
+    ]
+}
+```
+
+### ``GET /spread_alert/<market_id>``
+
+Entrega información sobre la comparación del spread actual del mercado versus un spread de alerta guardado.
+
+Ejemplo:
+
+```
+{
+    "markets": [
+        "BTC-CLP",
+        "BTC-COP",
+        "ETH-CLP",
+        ...
+    ]
+}
+```
+<!-- GET | /markets | Permite obtener un listado de mercados disponibles | tu
+GET | /spread/<market_id> | Permite consultar el spread de un mercado en particular | tu
+GET | /spreads | Obtiene los spreads de todos los mercados disponibles | tu
+POST | /spread_alert | Guarda un spread de alerta para posteriormente ser comparado con el spread actual del mercado | tu
+GET | /spread_alert/<market_id> | Entrega información sobre la comparación del spread actual del mercado versus un spread de alerta guardado | tu -->
