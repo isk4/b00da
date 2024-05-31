@@ -3,9 +3,6 @@
 require "net/http"
 
 class BudaService
-    def initialize
-    end
-
     def get_markets
         mkts_uri = URI("https://www.buda.com/api/v2/markets.json")
         res = Net::HTTP.get_response(mkts_uri)
@@ -36,12 +33,13 @@ class BudaService
 
     def get_all_spreads
         mkts = get_markets
-        unless mkts.nil?
+
+        if mkts
             mkt_ids = mkts[:markets].map { | mkt | mkt[:id] }
             sprd_error = false
             sprds = mkt_ids.map do | mkt_id |
                 sprd = get_spread(mkt_id)
-                sprd.nil? ? sprd_error = true : sprd = sprd[:spread][:value]
+                sprd ? sprd = sprd[:spread][:value] : sprd_error = true
                 [mkt_id, sprd]
             end
             return sprd_error ? nil : {spreads: sprds.to_h}
@@ -50,6 +48,7 @@ class BudaService
 
     def compare_spread(mkt_id, saved_value)
         sprd = get_spread(mkt_id)
+
         if sprd
             curr_value = sprd[:spread][:value]            
             msg = if curr_value > saved_value

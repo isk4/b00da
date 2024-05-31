@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::API
-    before_action :initialize_buda_service
+    before_action :init_buda_service
 
     def markets
         markets = @buda_service.get_markets
@@ -46,7 +46,7 @@ class ApplicationController < ActionController::API
 
     protected
 
-    def initialize_buda_service
+    def init_buda_service
         @buda_service = BudaService.new
     end
 
