@@ -19,28 +19,11 @@ Luego, dento de la carpeta del proyecto, arma la imagen de Docker:
     docker run -p 3000:3000 --rm b00da
 
 ## Endpoints
-### ``GET /markets``
+### `GET /markets`
 
-Permite obtener un listado de mercados disponibles.
+Permite obtener un listado de identificadores de mercados disponibles.
 
-Ejemplo:
-
-```
-{
-    "markets": [
-        "BTC-CLP",
-        "BTC-COP",
-        "ETH-CLP",
-        ...
-    ]
-}
-```
-
-### ``GET /spread/<market_id>``
-
-Permite consultar el spread de un mercado en particular.
-
-Ejemplo:
+Ejemplo de respuesta:
 
 ```
 {
@@ -48,63 +31,94 @@ Ejemplo:
         "BTC-CLP",
         "BTC-COP",
         "ETH-CLP",
+        "ETH-BTC",
+        "BTC-PEN",
         ...
     ]
 }
 ```
+---
 
-### ``GET /spreads``
+### `GET /spread/<market_id>`
+
+Permite consultar el spread de un mercado en particular, a través de su identificador:
+
+Ejemplo de respuesta:
+
+```
+{
+    "spread": {
+        "value": "464705.99",
+        "market_id": "BTC-CLP"
+    }
+}
+```
+---
+
+### `GET /spreads`
 
 Obtiene los spreads de todos los mercados disponibles.
 
-Ejemplo:
+Ejemplo de respuesta:
 
 ```
 {
-    "markets": [
-        "BTC-CLP",
-        "BTC-COP",
-        "ETH-CLP",
+    "spreads": {
+        "BTC-CLP": "391144.0",
+        "BTC-COP": "4679396.99",
+        "ETH-CLP": "23765.28",
+        "ETH-BTC": "0.0014374",
+        "BTC-PEN": "214.77",
         ...
-    ]
+    }
 }
 ```
+---
 
-### ``POST /spread_alert``
+### `POST /spread_alert`
 
-Guarda un spread de alerta para posteriormente ser comparado con el spread actual del mercado.
+Guarda un spread de alerta para posteriormente ser comparado con el spread actual del mercado.<br>Retorna un listado de alertas guardadas para el usuario.
 
-Ejemplo:
+Ejemplo de cuerpo para la petición:
 
 ```
 {
-    "markets": [
-        "BTC-CLP",
-        "BTC-COP",
-        "ETH-CLP",
-        ...
-    ]
+    "alert": {
+        "market_id": "USD-CLP",
+        "spread": "20.5"
+    }
 }
 ```
 
-### ``GET /spread_alert/<market_id>``
-
-Entrega información sobre la comparación del spread actual del mercado versus un spread de alerta guardado.
-
-Ejemplo:
+Ejemplo de respuesta:
 
 ```
 {
-    "markets": [
-        "BTC-CLP",
-        "BTC-COP",
-        "ETH-CLP",
-        ...
-    ]
+    "user_alerts": {
+        "BTC-CLP": "4000.0",
+        "ETH-BTC": "100.0",
+        "USDC-CLP": "20.5"
+    }
 }
 ```
-<!-- GET | /markets | Permite obtener un listado de mercados disponibles | tu
-GET | /spread/<market_id> | Permite consultar el spread de un mercado en particular | tu
-GET | /spreads | Obtiene los spreads de todos los mercados disponibles | tu
-POST | /spread_alert | Guarda un spread de alerta para posteriormente ser comparado con el spread actual del mercado | tu
-GET | /spread_alert/<market_id> | Entrega información sobre la comparación del spread actual del mercado versus un spread de alerta guardado | tu -->
+---
+
+### `GET /spread_alert/<market_id>`
+
+Entrega información sobre la comparación del spread actual del mercado contra un spread de alerta guardado, proporcionando un identificador de mercado.
+
+Retorna un objeto que posee el identificador de mercado consultado, un string `comparison` indicando si el spread actual es menor ( `"less"` ), mayor ( `"greater"` ) o igual ( `"equal"` ) que el guardado, la diferencia entre ellos y sus valores respectivos.
+
+Ejemplo de respuesta:
+
+```
+{
+    "spread": {
+        "market_id": "USDC-CLP",
+        "comparison": "less",
+        "difference": "-16.5",
+        "current_spread": "4.0",
+        "alert_spread": "20.5"
+    }
+}
+```
