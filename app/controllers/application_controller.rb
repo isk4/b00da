@@ -4,7 +4,7 @@ class ApplicationController < ActionController::API
     def markets
         markets = @buda_service.get_markets
         # markets = {message: "error"} if markets.nil?
-        code = markets.nil? ? :service_unavailable : :ok
+        code = markets ? :ok : :service_unavailable 
         render json: markets, status: code
     end
 
@@ -12,13 +12,13 @@ class ApplicationController < ActionController::API
         mkt_id = params[:market_id]
         spread = @buda_service.get_spread(mkt_id)
         # spread = {message: "error"} if spread.nil?
-        code = spread.nil? ? :service_unavailable : :ok
+        code = spread ? :ok : :service_unavailable
         render json: spread, status: code
     end
 
     def all_spreads
         spreads = @buda_service.get_all_spreads
-        code = spreads.nil? ? :service_unavailable : :ok
+        code = spreads ? :ok : :service_unavailable
         render json: spreads, status: code
     end
 
@@ -28,7 +28,7 @@ class ApplicationController < ActionController::API
         mkt_id = spread_alert_params[:market_id]
         spread = spread_alert_params[:spread]
         user_data[mkt_id] = BigDecimal(spread)
-        code = Rails.cache.write(user, user_data) ? :ok : service_unavailable
+        code = Rails.cache.write(user, user_data) ? :ok : :service_unavailable
         render json: {user_alerts: user_data}, status: code
     end
 
