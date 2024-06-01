@@ -148,6 +148,7 @@ Código | Descripción
 
 ## Supuestos
 
-* La API es pública y no requiere llaves, por lo que se decidió reconocer a los usuarios por IP.
+* La API es pública y no requiere llaves (se decidió reconocer a los usuarios por IP).
 * Proyecto de pequeña escala o prototipo.
-* Dado que no se requiere persistencia de datos, se trabajaron las alertas dentro de la caché de Rails (teniendo en cuenta de que, posiblemente, no sea la mejor opción).
+* No se requiere persistencia de datos (se trabaja la información de las alertas dentro de la caché de Rails, teniendo en cuenta de que, probablemente, no sea la mejor opción).
+* Se probará en un entorno sin acceso a uso de https (se desactivó su exigencia).
