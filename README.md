@@ -25,7 +25,7 @@ Permite obtener un listado de identificadores de mercados disponibles.
 
 Ejemplo de respuesta:
 
-```
+```javascript
 {
     "markets": [
         "BTC-CLP",
@@ -45,7 +45,7 @@ Permite consultar el spread de un mercado en particular, a través de su identif
 
 Ejemplo de respuesta:
 
-```
+```javascript
 {
     "spread": {
         "value": "464705.99",
@@ -63,7 +63,7 @@ Obtiene los spreads de todos los mercados disponibles.
 
 Ejemplo de respuesta:
 
-```
+```javascript
 {
     "spreads": {
         "BTC-CLP": "391144.0",
@@ -85,7 +85,7 @@ Guarda un spread de alerta para posteriormente ser comparado con el spread actua
 
 Ejemplo de cuerpo para la petición:
 
-```
+```javascript
 {
     "alert": {
         "market_id": "USD-CLP",
@@ -97,7 +97,7 @@ Ejemplo de cuerpo para la petición:
 
 Ejemplo de respuesta:
 
-```
+```javascript
 {
     "user_alerts": {
         "BTC-CLP": "4000.0",
@@ -116,7 +116,7 @@ Retorna un objeto que posee el identificador de mercado consultado, un string `c
 
 Ejemplo de respuesta:
 
-```
+```javascript
 {
     "spread_comp": {
         "market_id": "USDC-CLP",
@@ -132,7 +132,7 @@ Ejemplo de respuesta:
 
 En caso de error, recibirás respuestas de este tipo, con su código de error HTTP asociado:
 
-```
+```javascript
 {
     "message": "error",
     "code": "not_found"
@@ -149,5 +149,5 @@ Código | Descripción
 ## Supuestos
 
 * La API es pública y no requiere llaves, por lo que se decidió reconocer a los usuarios por IP.
-* Proyecto de pequeña escala o prototipo
+* Proyecto de pequeña escala o prototipo.
 * Dado que no se requiere persistencia de datos, se trabajaron las alertas dentro de la caché de Rails (teniendo en cuenta de que, posiblemente, no sea la mejor opción).
