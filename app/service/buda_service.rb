@@ -55,7 +55,7 @@ class BudaService
         if mkts[:code] != :ok
             return {message: "error", code: service_unavailable}
         else
-            if !mkts[:markets].include?(mkt_id)
+            if !mkts[:markets].include?(mkt_id) || !valid_spread?(sprd)
                 return {message: "error", code: :bad_request}
             else
                 user_data = Rails.cache.fetch(user) { {} }
@@ -112,5 +112,14 @@ class BudaService
 
     def status_code_to_sym(code)
         Rack::Utils::HTTP_STATUS_CODES[code].gsub(" ", "_").downcase.to_sym
+    end
+
+    def valid_spread?(sprd)
+        begin
+            BigDecimal(sprd)
+            return true
+        rescue ArgumentError => e
+            return false
+        end
     end
 end 

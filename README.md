@@ -93,7 +93,7 @@ Ejemplo de cuerpo para la petición:
     }
 }
 ```
-*Nota: el valor del spread de alerta puede ser proporcionado como string o número*
+*Nota: el valor del spread de alerta debe ser proporcionado como string o número entero.*
 
 Ejemplo de respuesta:
 
