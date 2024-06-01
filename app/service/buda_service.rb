@@ -2,9 +2,11 @@
 
 require "net/http"
 
+BUDA_BASE_URL = "https://www.buda.com/api/v2"
+
 class BudaService
     def get_markets
-        mkts_uri = URI("https://www.buda.com/api/v2/markets.json")
+        mkts_uri = URI("#{BUDA_BASE_URL}/markets.json")
         res = Net::HTTP.get_response(mkts_uri)
 
         if !res.is_a?(Net::HTTPSuccess)
@@ -17,7 +19,7 @@ class BudaService
     end
 
     def get_spread(mkt_id)
-        orders_uri = URI("https://www.buda.com/api/v2/markets/#{mkt_id}/order_book.json")
+        orders_uri = URI("#{BUDA_BASE_URL}/markets/#{mkt_id}/order_book.json")
         res = Net::HTTP.get_response(orders_uri)
 
         if !res.is_a?(Net::HTTPSuccess)
