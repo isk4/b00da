@@ -10,7 +10,9 @@ class BudaService
         if res.is_a?(Net::HTTPSuccess)
             mkts = JSON.parse(res.body)["markets"]
             mkts = mkts.map { |mkt| mkt["id"] }
-            return {markets: mkts}
+            return {markets: mkts, code: :ok}
+        else
+            return {message: "error", code: :service_unavailable}
         end
     end
 
@@ -21,48 +23,92 @@ class BudaService
         if res.is_a?(Net::HTTPSuccess)
             order_book = JSON.parse(res.body)["order_book"]
             sprd = nil
-            # Getting value of cheapest ask and most expensive bid
             unless order_book["asks"].empty? || order_book["bids"].empty?
                 sprd = BigDecimal(order_book["asks"][0][0]) - BigDecimal(order_book["bids"][0][0])
             end
-            return {spread: {value: sprd, market_id: order_book["market_id"]}}
+            return {spread: {value: sprd, market_id: order_book["market_id"]}, code: :ok}
+        else
+            return {message: "error", code: status_code_to_sym(res.code.to_i)}
         end
     end
 
     def get_all_spreads
         mkts = get_markets
 
-        if mkts
-            sprd_error = false
+        if mkts[:code] == :ok
             sprds = mkts[:markets].map do | mkt_id |
                 sprd = get_spread(mkt_id)
-                sprd ? sprd = sprd[:spread][:value] : sprd_error = true
-                [mkt_id, sprd]
+                return {message: "error", code: sprd[:code]} if sprd[:code] != :ok
+                [mkt_id, sprd[:spread][:value]]
             end
-            return sprd_error ? nil : {spreads: sprds.to_h}
+            return {spreads: sprds.to_h, code: :ok}
+        else
+            return {message: "error", code: :service_unavailable}
         end
     end
 
-    def compare_spread(mkt_id, saved_value)
+    def save_spread_alert(user, mkt_id, sprd)
+        mkts = get_markets
+
+        if mkts[:code] == :ok
+            if mkts[:markets].include?(mkt_id)
+                user_data = Rails.cache.fetch(user) { {} }
+                user_data[mkt_id] = BigDecimal(sprd)
+                
+                if Rails.cache.write(user, user_data)
+                    return {user_alerts: user_data, code: :ok}
+                else
+                    return {message: "error", code: :internal_server_error}
+                end
+            else
+                return {message: "error", code: :bad_request}
+            end
+        else
+            return {message: "error", code: service_unavailable}
+        end
+
+    end
+
+    def compare_spread(user, mkt_id)
         sprd = get_spread(mkt_id)
 
-        if sprd
-            curr_value = sprd[:spread][:value]            
-            msg = if curr_value > saved_value
-                "greater"
-            elsif curr_value < saved_value
-                "less"
+        if sprd[:code] == :ok
+            user_data = Rails.cache.read(user)
+            saved_sprd = user_data[mkt_id]
+
+            if user_data && saved_sprd
+                curr_sprd = sprd[:spread][:value]
+    
+                msg = if curr_sprd > saved_sprd
+                    "greater"
+                elsif curr_sprd < saved_sprd
+                    "less"
+                else
+                    "equal"
+                end
+    
+                diff = - (saved_sprd - curr_sprd) 
+                return {
+                    spread_comp: {
+                        market_id: mkt_id,
+                        comparison: msg,
+                        difference: diff,
+                        current_spread: curr_sprd,
+                        alert_spread: saved_sprd
+                    },
+                    code: :ok
+                }
             else
-                "equal"
+                return {message: "error", code: :not_found}
             end
-            diff = - (saved_value - curr_value) 
-            return {spread: {
-                market_id: mkt_id,
-                comparison: msg,
-                difference: diff,
-                current_spread: curr_value,
-                alert_spread: saved_value
-            }}
+        else
+            return {message: "error", code: :service_unavailable}
         end
+    end
+
+    protected
+
+    def status_code_to_sym(code)
+        Rack::Utils::HTTP_STATUS_CODES[code].gsub(" ", "_").downcase.to_sym
     end
 end 

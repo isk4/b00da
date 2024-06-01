@@ -3,45 +3,43 @@ class ApplicationController < ActionController::API
 
     def markets
         markets = @buda_service.get_markets
-        # markets = {message: "error"} if markets.nil?
-        code = markets ? :ok : :service_unavailable 
+        code = markets[:code]
+        market.delete(:code) unless markets[:message] == "error"
         render json: markets, status: code
     end
 
     def spread
         mkt_id = params[:market_id]
         spread = @buda_service.get_spread(mkt_id)
-        # spread = {message: "error"} if spread.nil?
-        code = spread ? :ok : :service_unavailable
+        code = spread[:code]
+        spread.delete(:code) unless spread[:message] == "error"
         render json: spread, status: code
     end
 
     def all_spreads
         spreads = @buda_service.get_all_spreads
-        code = spreads ? :ok : :service_unavailable
+        code = spreads[:code]
+        spreads.delete(:code) unless spreads[:message] == "error"
         render json: spreads, status: code
     end
 
     def save_spread_alert
         user = request.remote_ip
-        user_data = Rails.cache.fetch(user) { {} }
         mkt_id = spread_alert_params[:market_id]
         spread = spread_alert_params[:spread]
-        user_data[mkt_id] = BigDecimal(spread)
-        code = Rails.cache.write(user, user_data) ? :ok : :service_unavailable
-        render json: {user_alerts: user_data}, status: code
+        alert = @buda_service.save_spread_alert(user, mkt_id, spread)
+        code = alert[:code]
+        alert.delete(:code) unless alert[:message] == "error"
+        render json: alert, status: code
     end
 
     def poll_spread_alert
         user = request.remote_ip
-        user_data = Rails.cache.read(user)
         mkt_id = params[:market_id]
-        if user_data && user_data[mkt_id]
-            saved_spread = user_data[mkt_id]
-            spread_comp = @buda_service.compare_spread(mkt_id, saved_spread)
-        end
-        code = spread_comp ? :ok : :not_found
-        render json: spread_comp, status: code
+        sprd_comp = @buda_service.compare_spread(user, mkt_id)
+        code = sprd_comp[:code]
+        sprd_comp.delete(:code) unless sprd_comp[:message] == "error"
+        render json: sprd_comp, status: code
     end
 
     protected
