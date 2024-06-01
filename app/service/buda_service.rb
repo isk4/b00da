@@ -77,7 +77,7 @@ class BudaService
         if sprd[:code] != :ok
             return {message: "error", code: sprd[:code]}
         else
-            user_data = Rails.cache.read(user)
+            user_data = Rails.cache.fetch(user) { {} }
             saved_sprd = user_data[mkt_id]
 
             if user_data.nil? || saved_sprd.nil?
