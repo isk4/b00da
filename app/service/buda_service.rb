@@ -7,12 +7,12 @@ class BudaService
         mkts_uri = URI("https://www.buda.com/api/v2/markets.json")
         res = Net::HTTP.get_response(mkts_uri)
 
-        if res.is_a?(Net::HTTPSuccess)
+        if !res.is_a?(Net::HTTPSuccess)
+            return {message: "error", code: :service_unavailable}
+        else
             mkts = JSON.parse(res.body)["markets"]
             mkts = mkts.map { |mkt| mkt["id"] }
             return {markets: mkts, code: :ok}
-        else
-            return {message: "error", code: :service_unavailable}
         end
     end
 
@@ -20,38 +20,42 @@ class BudaService
         orders_uri = URI("https://www.buda.com/api/v2/markets/#{mkt_id}/order_book.json")
         res = Net::HTTP.get_response(orders_uri)
 
-        if res.is_a?(Net::HTTPSuccess)
+        if !res.is_a?(Net::HTTPSuccess)
+            return {message: "error", code: status_code_to_sym(res.code.to_i)}
+        else
             order_book = JSON.parse(res.body)["order_book"]
             sprd = nil
             unless order_book["asks"].empty? || order_book["bids"].empty?
                 sprd = BigDecimal(order_book["asks"][0][0]) - BigDecimal(order_book["bids"][0][0])
             end
             return {spread: {value: sprd, market_id: order_book["market_id"]}, code: :ok}
-        else
-            return {message: "error", code: status_code_to_sym(res.code.to_i)}
         end
     end
 
     def get_all_spreads
         mkts = get_markets
 
-        if mkts[:code] == :ok
+        if mkts[:code] != :ok
+            return {message: "error", code: :service_unavailable}
+        else
             sprds = mkts[:markets].map do | mkt_id |
                 sprd = get_spread(mkt_id)
                 return {message: "error", code: sprd[:code]} if sprd[:code] != :ok
                 [mkt_id, sprd[:spread][:value]]
             end
             return {spreads: sprds.to_h, code: :ok}
-        else
-            return {message: "error", code: :service_unavailable}
         end
     end
 
     def save_spread_alert(user, mkt_id, sprd)
         mkts = get_markets
 
-        if mkts[:code] == :ok
-            if mkts[:markets].include?(mkt_id)
+        if mkts[:code] != :ok
+            return {message: "error", code: service_unavailable}
+        else
+            if !mkts[:markets].include?(mkt_id)
+                return {message: "error", code: :bad_request}
+            else
                 user_data = Rails.cache.fetch(user) { {} }
                 user_data[mkt_id] = BigDecimal(sprd)
                 
@@ -60,11 +64,7 @@ class BudaService
                 else
                     return {message: "error", code: :internal_server_error}
                 end
-            else
-                return {message: "error", code: :bad_request}
             end
-        else
-            return {message: "error", code: service_unavailable}
         end
 
     end
@@ -72,11 +72,15 @@ class BudaService
     def compare_spread(user, mkt_id)
         sprd = get_spread(mkt_id)
 
-        if sprd[:code] == :ok
+        if sprd[:code] != :ok
+            return {message: "error", code: :service_unavailable}
+        else
             user_data = Rails.cache.read(user)
             saved_sprd = user_data[mkt_id]
 
-            if user_data && saved_sprd
+            if user_data.nil? || saved_sprd.nil?
+                return {message: "error", code: :not_found}
+            else
                 curr_sprd = sprd[:spread][:value]
     
                 msg = if curr_sprd > saved_sprd
@@ -98,11 +102,7 @@ class BudaService
                     },
                     code: :ok
                 }
-            else
-                return {message: "error", code: :not_found}
             end
-        else
-            return {message: "error", code: :service_unavailable}
         end
     end
 
