@@ -113,7 +113,7 @@ Ejemplo de respuesta:
 
 ```
 {
-    "spread": {
+    "spread_comp": {
         "market_id": "USDC-CLP",
         "comparison": "less",
         "difference": "-16.5",
@@ -122,3 +122,21 @@ Ejemplo de respuesta:
     }
 }
 ```
+
+## Errores
+
+En caso de error, recibirás respuestas de este tipo, con su código de error HTTP asociado:
+
+```
+{
+    "message": "error",
+    "code": "not_found"
+}
+```
+
+Los principales códigos de error entregados y su significado son:
+Código | Descripción
+---|---
+`not_found` | No se encuentran recursos asociados al identificador proporcionado
+`service_unavailable` | Hay problemas con la conexión al servidor de Buda
+`internal_server_error` | Ocurrió un error al intentar procesar los datos
