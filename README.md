@@ -53,6 +53,8 @@ Ejemplo de respuesta:
     }
 }
 ```
+*Nota: si no existen órdenes de compra o venta para el mercado seleccionado, el spread será*  `null`
+
 ---
 
 ### `GET /spreads`
@@ -73,6 +75,8 @@ Ejemplo de respuesta:
     }
 }
 ```
+*Nota: si no existen órdenes de compra o venta para algún mercado, su spread será*  `null`
+
 ---
 
 ### `POST /spread_alert`
@@ -89,6 +93,7 @@ Ejemplo de cuerpo para la petición:
     }
 }
 ```
+*Nota: el valor del spread de alerta puede ser proporcionado como string o número*
 
 Ejemplo de respuesta:
 
@@ -140,3 +145,9 @@ Código | Descripción
 `not_found` | No se encuentran recursos asociados al identificador proporcionado
 `service_unavailable` | Hay problemas con la conexión al servidor de Buda
 `internal_server_error` | Ocurrió un error al intentar procesar los datos
+
+## Supuestos
+
+* La API es pública y no requiere llaves, por lo que se decidió reconocer a los usuarios por IP.
+* Proyecto de pequeña escala o prototipo
+* Dado que no se requiere persistencia de datos, se trabajaron las alertas dentro de la caché de Rails (teniendo en cuenta de que, posiblemente, no sea la mejor opción).
