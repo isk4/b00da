@@ -73,7 +73,7 @@ class BudaService
         sprd = get_spread(mkt_id)
 
         if sprd[:code] != :ok
-            return {message: "error", code: :service_unavailable}
+            return {message: "error", code: sprd[:code]}
         else
             user_data = Rails.cache.read(user)
             saved_sprd = user_data[mkt_id]
