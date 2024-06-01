@@ -4,7 +4,7 @@ class ApplicationController < ActionController::API
     def markets
         markets = @buda_service.get_markets
         code = markets[:code]
-        market.delete(:code) if markets[:message] != "error"
+        markets.delete(:code) if markets[:message] != "error"
         render json: markets, status: code
     end
 
